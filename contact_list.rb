@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require_relative 'contact'
 require 'pry'
 
@@ -32,13 +34,13 @@ def initialize
       puts "Do you want to create another number? (yes/no)"
       input = STDIN.gets.chomp.downcase
     end
-    # binding.pry
     new_contact = Contact.create(full_name, email, full_number)
     puts "ID: #{new_contact.id} | Name: #{new_contact.name} | Email: #{new_contact.email} | Phone: #{new_contact.number.compact}"
 
   # List all contacts
   elsif ARGV[0] == "list"
     puts "Listing all contacts..."
+    puts "GETTING HERE!"
     retrieved_array = Contact.all
     counter = 0
     retrieved_array.each do |line| 

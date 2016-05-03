@@ -1,12 +1,10 @@
+
+
 require 'csv'
 
 # Represents a person in an address book.
 # The ContactList class will work with Contact objects instead of interacting with the CSV file directly
 class Contact
-
-class IncorrectID < StandardError
-
-end
 
   attr_reader :id 
   attr_accessor :name, :email, :number
@@ -20,7 +18,6 @@ end
     @email = email
     @number = full_number
     @id = id
-    # @counter = counter
     # TODO: Assign parameter values to instance variables.
   end
 
@@ -47,8 +44,9 @@ end
       # TODO: Instantiate a Contact, add its data to the 'contacts.csv' file, and return it.
       final_array = []
       new_contact = Contact.new(name,email,full_number)
-      CSV.open("contacts.csv", "a") do |csv|
+      CSV.open("contacts.csv", "a+") do |csv|
         raise "That email is already in the system and cannot be created" if search(new_contact.email).empty? == false
+        # csv << [20, "Justin", "hsaudhasudhuas", "mob: 111111"]
         csv << [new_contact.generate_id, new_contact.name, new_contact.email, new_contact.number].flatten
       end
       new_contact
@@ -59,17 +57,7 @@ end
     # @return [Contact, nil] the contact with the specified id. If no contact has the id, returns nil.
     def find(id)
       # TODO: Find the Contact in the 'contacts.csv' file with the matching id.
-        # binding.pry
-      # while id && id.to_i <= CSV.read("contacts.csv").length + 1
-        # begin 
-          full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[0].to_i)}.select {|contact| contact.id == id.to_i} 
-        # rescue NoMethodError
-        #   puts "There was a problem with the contact. Please re-enter"
-        #   id = gets.chomp
-        # else NoMethodError
-        #   break
-        # end
-      # end
+      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[0].to_i)}.select {|contact| contact.id == id.to_i} 
       full_array[0]
     end
     
