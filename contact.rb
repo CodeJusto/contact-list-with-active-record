@@ -8,7 +8,7 @@ class IncorrectID < StandardError
 
 end
 
-  attr_reader :id
+  attr_reader :id 
   attr_accessor :name, :email, :number
   
   # Creates a new contact object
@@ -20,6 +20,7 @@ end
     @email = email
     @number = full_number
     @id = id
+    # @counter = counter
     # TODO: Assign parameter values to instance variables.
   end
 
@@ -36,7 +37,7 @@ end
       # TODO: Return an Array of Contact instances made from the data in 'contacts.csv'.
       # CSV.read("file") returns an array based on each line of the CSV. We are then creating a new 
       # array using map USING elements of each row from the CSV.
-      CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[0].to_i)} 
+      CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[3..row.length], row[0].to_i)} 
     end
 
     # Creates a new contact, adding it to the csv file, returning the new contact.
