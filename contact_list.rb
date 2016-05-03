@@ -53,16 +53,16 @@ def initialize
   # Show a single contact
   elsif ARGV[0] == "show" && /\d+/.match(ARGV[1]) 
     retrieved_array = Contact.find(ARGV[1])
-    while true
-      begin
-        puts "ID: #{retrieved_array.id} | Name: #{retrieved_array.name} | Email: #{retrieved_array.email} | Phone: #{new_contact.number.compact}"
-        break
-      rescue
-        puts "Please enter a new ID"
-        input = STDIN.gets.chomp
-        retrieved_array = Contact.find(input)
-      end
-    end
+    # while true
+    #   begin
+        puts "ID: #{retrieved_array.id} | Name: #{retrieved_array.name} | Email: #{retrieved_array.email} | Phone: #{retrieved_array.number.compact}"
+    #     break
+    #   rescue
+    #     puts "Please enter a new ID"
+    #     input = STDIN.gets.chomp
+    #     retrieved_array = Contact.find(input)
+    #   end
+    # end
   # Search for a single contact
   elsif ARGV[0] == "search" && /\w+/.match(ARGV[1])
     retrieved_array = Contact.search(ARGV[1])

@@ -57,7 +57,7 @@ class Contact
     # @return [Contact, nil] the contact with the specified id. If no contact has the id, returns nil.
     def find(id)
       # TODO: Find the Contact in the 'contacts.csv' file with the matching id.
-      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[0].to_i)}.select {|contact| contact.id == id.to_i} 
+      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[3..row.length], row[0].to_i)} .select {|contact| contact.id == id.to_i} 
       full_array[0]
     end
     
@@ -66,7 +66,7 @@ class Contact
     # @return [Array<Contact>] Array of Contact objects.
     def search(term)
       # TODO: Select the Contact instances from the 'contacts.csv' file whose name or email attributes contain the search term.
-      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[0])}.select do |contact| 
+      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[3..row.length], row[0].to_i)} .select do |contact| 
         contact.name.include?(term) || contact.email.include?(term)
       end 
       full_array
