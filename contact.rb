@@ -1,77 +1,67 @@
+require 'pg'
 
-
-require 'csv'
-
-# Represents a person in an address book.
-# The ContactList class will work with Contact objects instead of interacting with the CSV file directly
 class Contact
 
-  attr_reader :id 
-  attr_accessor :name, :email, :number
+  attr_accessor :name, :email, :number, :id
+
+  @@conn = PG.connect({
+  host: 'localhost',
+  dbname: 'contactdb',
+  user: 'development',
+  password: 'development'})
   
-  # Creates a new contact object
-  # @param name [String] The contact's name
-  # @param email [String] The contact's email address
-  def initialize(name, email, full_number, id= nil)
-    raise 'IDs must be greater than 0 (and also numbers)!' if id && id.to_i <= 0
+  def initialize(name, email, id= nil)
     @name = name
     @email = email
-    @number = full_number
+    # @number = full_number
     @id = id
-    # TODO: Assign parameter values to instance variables.
   end
 
-  def generate_id
-    @id = CSV.read("contacts.csv").length+1
+  def save
+    if id == nil
+      @@conn.exec_params("INSERT INTO contactfix (name, email) VALUES ($1, $2);", [name, email])
+    else
+      @@conn.exec_params("UPDATE contactfix SET name=$1, email=$2 WHERE id=$3;", [name, email, id])
+    end
   end
 
-  # Provides functionality for managing contacts in the csv file.
+  def destroy
+    @@conn.exec_params("DELETE FROM contactfix WHERE id = $1::int;", [id])
+  end
+
   class << self
 
-    # Opens 'contacts.csv' and creates a Contact object for each line in the file (aka each contact).
-    # @return [Array<Contact>] Array of Contact objects
     def all
-      # TODO: Return an Array of Contact instances made from the data in 'contacts.csv'.
-      # CSV.read("file") returns an array based on each line of the CSV. We are then creating a new 
-      # array using map USING elements of each row from the CSV.
-      CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[3..row.length], row[0].to_i)} 
+        results = []
+        @@conn.exec("SELECT * FROM contactfix ORDER BY id;").each do |contact|
+          results << create_from_row(contact)
+        end
+        results
     end
 
-    # Creates a new contact, adding it to the csv file, returning the new contact.
-    # @param name [String] the new contact's name
-    # @param email [String] the contact's email
-    def create(name, email, full_number)
-      # TODO: Instantiate a Contact, add its data to the 'contacts.csv' file, and return it.
-      final_array = []
-      new_contact = Contact.new(name,email,full_number)
-      CSV.open("contacts.csv", "a+") do |csv|
-        raise "That email is already in the system and cannot be created" if search(new_contact.email).empty? == false
-        # csv << [20, "Justin", "hsaudhasudhuas", "mob: 111111"]
-        csv << [new_contact.generate_id, new_contact.name, new_contact.email, new_contact.number].flatten
-      end
-      new_contact
+    def create(name, email)
+      new_contact = Contact.new(name,email)
+      new_contact.save
+      create_from_row(@@conn.exec("SELECT * FROM contactfix ORDER BY id DESC LIMIT 1;")[0])
     end
     
-    # Find the Contact in the 'contacts.csv' file with the matching id.
-    # @param id [Integer] the contact id
-    # @return [Contact, nil] the contact with the specified id. If no contact has the id, returns nil.
     def find(id)
-      # TODO: Find the Contact in the 'contacts.csv' file with the matching id.
-      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[3..row.length], row[0].to_i)} .select {|contact| contact.id == id.to_i} 
-      full_array[0]
+      @@conn.exec_params("SELECT * FROM contactfix WHERE id=$1::int;", [id]).map do |result|
+        create_from_row(result)
+      end
     end
     
-    # Search for contacts by either name or email.
-    # @param term [String] the name fragment or email fragment to search for
-    # @return [Array<Contact>] Array of Contact objects.
     def search(term)
-      # TODO: Select the Contact instances from the 'contacts.csv' file whose name or email attributes contain the search term.
-      full_array = CSV.read("contacts.csv").map {|row| Contact.new(row[1],row[2],row[3..row.length], row[0].to_i)} .select do |contact| 
-        contact.name.include?(term) || contact.email.include?(term)
-      end 
-      full_array
+      term = "%#{term}%"
+      @@conn.exec_params("SELECT * FROM contactfix WHERE name LIKE $1;", [term]).map do |result|
+        create_from_row(result)
+      end
     end
 
+    def create_from_row(c)
+      Contact.new(c["name"], c["email"], c["id"])
+    end
   end
-
 end
+
+
