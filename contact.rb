@@ -40,11 +40,10 @@ class Contact
     end
 
     def create(name, email)
-
       new_contact = Contact.new(name,email)
       new_contact.save
       create_from_row(@@conn.exec("SELECT * FROM contactfix ORDER BY id DESC LIMIT 1;")[0])
-      end
+    end
     
     def find(id)
       @@conn.exec_params("SELECT * FROM contactfix WHERE id=$1::int;", [id]).map do |result|
